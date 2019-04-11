@@ -28,6 +28,7 @@ import (
 
 	"istio.io/istio/istioctl/cmd/istioctl/gendeployment"
 	"istio.io/istio/istioctl/pkg/install"
+	"istio.io/istio/istioctl/pkg/gentemplate"
 	"istio.io/istio/istioctl/pkg/validate"
 	"istio.io/istio/pilot/pkg/serviceregistry/kube"
 	"istio.io/istio/pkg/cmd"
@@ -132,6 +133,8 @@ func init() {
 	rootCmd.AddCommand(contextCmd)
 
 	rootCmd.AddCommand(validate.NewValidateCommand())
+
+	experimentalCmd.AddCommand(gentemplate.NewGenerateTemplateCommand())
 }
 
 func getRemoteInfo() (*version.MeshInfo, error) {
