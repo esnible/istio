@@ -27,8 +27,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"istio.io/istio/istioctl/cmd/istioctl/gendeployment"
-	"istio.io/istio/istioctl/pkg/install"
 	"istio.io/istio/istioctl/pkg/gentemplate"
+	"istio.io/istio/istioctl/pkg/install"
 	"istio.io/istio/istioctl/pkg/validate"
 	"istio.io/istio/pilot/pkg/serviceregistry/kube"
 	"istio.io/istio/pkg/cmd"
@@ -134,7 +134,7 @@ func init() {
 
 	rootCmd.AddCommand(validate.NewValidateCommand())
 
-	experimentalCmd.AddCommand(gentemplate.NewGenerateTemplateCommand())
+	experimentalCmd.AddCommand(gentemplate.NewGenerateTemplateCommand(kubeconfig, configContext))
 }
 
 func getRemoteInfo() (*version.MeshInfo, error) {
