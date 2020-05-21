@@ -18,9 +18,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	"istio.io/istio/istioctl/pkg/clioptions"
-	"istio.io/istio/istioctl/pkg/kubernetes"
 )
 
 func TestProxyStatus(t *testing.T) {
@@ -33,7 +30,7 @@ func TestProxyStatus(t *testing.T) {
 			args:           strings.Split("ps", " "),
 			expectedString: "NAME     CDS     LDS     EDS     RDS     PILOT",
 		},
-		{ // case 5: supplying nonexistent pod name should result in error with --sds flag
+		{ // case 5: supplying nonexistent pod name should result in error
 			args:          strings.Split("proxy-status random-gibberish-podname-61789237418234", " "),
 			wantException: true,
 		},
@@ -45,21 +42,7 @@ func TestProxyStatus(t *testing.T) {
 
 	for i, c := range cases {
 		t.Run(fmt.Sprintf("case %d %s", i, strings.Join(c.args, " ")), func(t *testing.T) {
-			clientExecSdsFactory = mockClientExecSDSFactoryGenerator(c.execClientConfig)
 			verifyExecTestOutput(t, c)
 		})
 	}
-}
-
-// mockClientExecFactoryGenerator generates a function with the same signature as
-// kubernetes.NewExecClient() that returns a mock client.
-// nolint: lll
-func mockClientExecSDSFactoryGenerator(testResults map[string][]byte) func(kubeconfig, configContext string, _ clioptions.ControlPlaneOptions) (kubernetes.ExecClientSDS, error) {
-	outFactory := func(kubeconfig, configContext string, _ clioptions.ControlPlaneOptions) (kubernetes.ExecClientSDS, error) {
-		return mockExecConfig{
-			results: testResults,
-		}, nil
-	}
-
-	return outFactory
 }

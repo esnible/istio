@@ -25,7 +25,6 @@ import (
 	"istio.io/istio/istioctl/pkg/clioptions"
 	"istio.io/istio/istioctl/pkg/kubernetes"
 	"istio.io/istio/pilot/test/util"
-	"istio.io/istio/security/pkg/nodeagent/sds"
 	"istio.io/pkg/version"
 )
 
@@ -109,11 +108,6 @@ func TestProxyConfig(t *testing.T) {
 			expectedString: "unable to retrieve Pod: pods \"invalid\" not found",
 			wantException:  true, // "istioctl proxy-config bootstrap invalid" should fail
 		},
-		{ // secret invalid
-			args:           strings.Split("proxy-config secret invalid", " "),
-			expectedString: "unable to retrieve Pod: pods \"invalid\" not found",
-			wantException:  true, // "istioctl proxy-config secret invalid" should fail
-		},
 		{ // endpoint invalid
 			args:           strings.Split("proxy-config endpoint invalid", " "),
 			expectedString: "unable to retrieve Pod: pods \"invalid\" not found",
@@ -132,6 +126,7 @@ func verifyExecTestOutput(t *testing.T, c execTestCase) {
 	t.Helper()
 
 	// Override the exec client factory used by proxyconfig.go and proxystatus.go
+	fmt.Printf("@@@ ecs about to override clientExecFactory\n")
 	clientExecFactory = mockClientExecFactoryGenerator(c.execClientConfig)
 	envoyClientFactory = mockEnvoyClientFactoryGenerator(c.execClientConfig)
 
@@ -213,12 +208,4 @@ func (client mockExecConfig) PodsForSelector(namespace, labelSelector string) (*
 
 func (client mockExecConfig) BuildPortForwarder(podName string, ns string, localAddr string, localPort int, podPort int) (*kubernetes.PortForward, error) {
 	return nil, fmt.Errorf("mock k8s does not forward")
-}
-
-func (client mockExecConfig) GetPodNodeAgentSecrets(podName, ns, istioNamespace string) (map[string]sds.Debug, error) {
-	return map[string]sds.Debug{}, nil
-}
-
-func (client mockExecConfig) NodeAgentDebugEndpointOutput(podName, ns, secretType, container string) (sds.Debug, error) {
-	return sds.Debug{}, nil
 }

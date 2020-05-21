@@ -671,55 +671,8 @@ func proxyConfig() *cobra.Command {
 	bootstrapConfigCmd.PersistentFlags().StringVarP(&configDumpFile, "file", "f", "",
 		"Envoy config dump JSON file")
 
-	secretConfigCmd := &cobra.Command{
-		Use:   "secret [<pod-name[.namespace]>]",
-		Short: "(experimental) Retrieves secret configuration for the Envoy in the specified pod",
-		Long:  `(experimental) Retrieve information about secret configuration for the Envoy instance in the specified pod.`,
-		Example: `  # Retrieve full secret configuration for a given pod from Envoy.
-  istioctl proxy-config secret <pod-name[.namespace]>
-
-  # Retrieve full bootstrap without using Kubernetes API
-  ssh <user@hostname> 'curl localhost:15000/config_dump' > envoy-config.json
-  istioctl proxy-config secret --file envoy-config.json
-
-THIS COMMAND IS STILL UNDER ACTIVE DEVELOPMENT AND NOT READY FOR PRODUCTION USE.
-`,
-		Aliases: []string{"s"},
-		Args: func(cmd *cobra.Command, args []string) error {
-			if (len(args) == 1) != (configDumpFile == "") {
-				cmd.Println(cmd.UsageString())
-				return fmt.Errorf("secret requires pod name or --file parameter")
-			}
-			return nil
-		},
-		RunE: func(c *cobra.Command, args []string) error {
-			var configWriter *configdump.ConfigWriter
-			var err error
-			if len(args) == 1 {
-				podName, ns := handlers.InferPodInfo(args[0], handlers.HandleNamespace(namespace, defaultNamespace))
-				configWriter, err = setupPodConfigdumpWriter(podName, ns, c.OutOrStdout())
-			} else {
-				configWriter, err = setupFileConfigdumpWriter(configDumpFile, c.OutOrStdout())
-			}
-			if err != nil {
-				return err
-			}
-			switch outputFormat {
-			case summaryOutput:
-				return configWriter.PrintSecretSummary()
-			case jsonOutput:
-				return configWriter.PrintSecretDump()
-			default:
-				return fmt.Errorf("output format %q not supported", outputFormat)
-			}
-		},
-	}
-
-	secretConfigCmd.PersistentFlags().StringVarP(&configDumpFile, "file", "f", "",
-		"Envoy config dump JSON file")
-
 	configCmd.AddCommand(
-		clusterConfigCmd, listenerConfigCmd, logCmd, routeConfigCmd, bootstrapConfigCmd, endpointConfigCmd, secretConfigCmd)
+		clusterConfigCmd, listenerConfigCmd, logCmd, routeConfigCmd, bootstrapConfigCmd, endpointConfigCmd)
 
 	return configCmd
 }
