@@ -17,6 +17,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -83,6 +84,7 @@ func ConfigAndEnvProcessing() error {
 	viper.AutomaticEnv()
 	viper.SetConfigName("config") // name of config file (without extension)
 	viper.SetConfigType("yaml")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("_", "-"))
 	viper.AddConfigPath("$HOME/.istioctl")
 	return viper.ReadInConfig()
 }
@@ -189,6 +191,8 @@ debug and diagnose their Istio mesh.
 
 	experimentalCmd.AddCommand(multicluster.NewCreateRemoteSecretCommand())
 	experimentalCmd.AddCommand(multicluster.NewMulticlusterCommand())
+
+	experimentalCmd.AddCommand(configCmd())
 
 	rootCmd.AddCommand(collateral.CobraCommand(rootCmd, &doc.GenManHeader{
 		Title:   "Istio Control",
